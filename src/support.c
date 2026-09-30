@@ -1,6 +1,7 @@
 #include "support.h"
 #include <vitasdk.h>
 
+char moddir[64];
 SDL_Surface *screen;
 int keyboard[SDLK_LAST];
 int debug=0;

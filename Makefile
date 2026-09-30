@@ -3,11 +3,13 @@ SOURCES		:= src
 			
 INCLUDES	:= include
 
-LIBS =   -lSceLibKernel_stub -lSceAppMgr_stub -lm -lSceNet_stub -lSceNetCtl_stub \
+MEDIA_LIBS := $(shell arm-vita-eabi-pkg-config --static --libs SDL_mixer SDL_image freetype2)
+
+LIBS = -Wl,--start-group $(MEDIA_LIBS) -lSceLibKernel_stub -lSceAppMgr_stub -lm -lSceNet_stub -lSceNetCtl_stub \
     -lSceAppUtil_stub -lScePower_stub -lmad -lSDL_mixer -lvorbisfile -lvorbis -logg \
 	-lSDL -lSDL_image -lSceAudio_stub -lc -lvita2d -lScePvf_stub -lScePgf_stub -ljpeg -lpng16 \
 	-lz -lSceDisplay_stub -lfreetype -lSceGxm_stub -lSceCtrl_stub -lSceSysmodule_stub \
-	-lSceCommonDialog_stub -lSceHid_stub
+	-lSceCommonDialog_stub -lSceHid_stub -Wl,--end-group
 
 CFILES   := $(foreach dir,$(SOURCES), $(wildcard $(dir)/*.c))
 CPPFILES   := $(foreach dir,$(SOURCES), $(wildcard $(dir)/*.cpp))
@@ -17,7 +19,7 @@ OBJS     := $(addsuffix .o,$(BINFILES)) $(CFILES:.c=.o) $(CPPFILES:.cpp=.o)
 PREFIX  = arm-vita-eabi
 CC      = $(PREFIX)-gcc
 CXX      = $(PREFIX)-g++
-CFLAGS  = -fno-lto -g -Wl,-q -O3
+CFLAGS  = -fno-lto -g -Wl,-q -O3 -std=gnu17
 CXXFLAGS  = $(CFLAGS) -fno-exceptions -std=gnu++11 -fpermissive
 ASFLAGS = $(CFLAGS)
 
@@ -27,9 +29,9 @@ $(TARGET).vpk: $(TARGET).velf
 	vita-mksfoex -s TITLE_ID=KETM00001 "K.E.T.M." param.sfo
 	cp -f param.sfo sce_sys/param.sfo
 	
-	#------------ Comment this if you don't have 7zip ------------------
-	7z a -tzip $(TARGET).vpk -r sce_sys/* eboot.bin 
-	#-------------------------------------------------------------------
+	vita-pack-vpk -s param.sfo -b eboot.bin \
+		--add sce_sys/icon0.png=sce_sys/icon0.png \
+		--add sce_sys/livearea=sce_sys/livearea $@
 
 %.velf: %.elf
 	cp $< $<.unstripped.elf
