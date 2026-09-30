@@ -75,7 +75,7 @@ typedef struct {
 #include "hiscore.h"
 #include "fps.h"
 
-char moddir[64];
+extern char moddir[64];
 
 void game_init(int argc, char *argv[]);
 #ifndef GP2X
